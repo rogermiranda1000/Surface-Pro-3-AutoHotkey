@@ -1,5 +1,5 @@
 # Surface Pro 3 AutoHotkey
-An AutoHotkey script to customize Surface Pro 3 pen buttons
+An AutoHotkey (v1) script to customize Surface Pro 3/X pen buttons
 
 ## Quick Start
 1. Create a new folder somewhere to store everything.
