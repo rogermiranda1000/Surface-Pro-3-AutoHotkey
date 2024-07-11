@@ -11,7 +11,7 @@ global PEN_TOUCHING := 0x05          ; Pen is touching screen.
 global PEN_ERASER_TOUCHING := 0x1C   ; eraser button is pressed, pen is touching screen.
 global PEN_BTN_TOUCHING := 0x25      ; button is pressed, pen is touching screen.
 global PEN_NOT_HOVERING := 0x0       ; Pen is moved away from screen.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
 ; Respond to the pen inputs
 ; Fill this section with your favorite AutoHotkey scripts!
 ; lastInput is the last input that was detected before a state change.
