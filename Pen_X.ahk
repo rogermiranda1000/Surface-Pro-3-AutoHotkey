@@ -20,6 +20,8 @@ PenCallback(input, lastInput) {
     static selecting := false
     ; has the user touched the screen while selecting?
     static has_selected := false
+    ; is the user modifying an area that has been selected?
+    static modify_selected := false
 
     if (WinActive("ahk_exe paintdotnet.exe")) {
         if (!selecting) && (input = PEN_BTN_HOVERING) {
@@ -27,6 +29,7 @@ PenCallback(input, lastInput) {
             ; note: first we select the pencil to make sure that it was not in some "select-related" tool
             Send, pss
             selecting := true
+            modify_selected := false
             has_selected := false
         }
 
@@ -39,6 +42,7 @@ PenCallback(input, lastInput) {
             if (has_selected) {
                 ; previously selecting and done; cut&paste to modify
                 Send, {LControl Down}xv{LControl Up}
+                modify_selected := true
             }
             else {
                 ; nothing was selected (back to the brush)
@@ -47,14 +51,35 @@ PenCallback(input, lastInput) {
             selecting := false
         }
 
-        if (input = PEN_ERASER_HOVERING) {
-            ; activate eraser
-            Send, e
+        ; using the eraser while modifying is considered 'done editing'
+        if (modify_selected) && (input = PEN_ERASER_TOUCHING) {
+            ; the user is done with the modification; discard the selection
+            Send, {LControl Down}d{LControl Up}
+            modify_selected := false
         }
 
+        ; this will also fallback for the 'editing' tool selection (as 'done editing' is done with the eraser, will trigger this)
         if (lastInput = PEN_ERASER_HOVERING || lastInput = PEN_ERASER_TOUCHING) && (input != PEN_ERASER_HOVERING && input != PEN_ERASER_TOUCHING) {
             ; no longer using the eraser - deactivate (back to the brush)
             Send, b
+        }
+
+        if (!selecting && !modify_selected) && (input = PEN_NOT_HOVERING) {
+            ; the user is doing nothing and the pen is no longer pressed
+            ; (maybe he wants to use the finger?) swap to 'move'
+            Send, h
+        }
+
+        if (!selecting && !modify_selected) {
+            ; opposite of the top condition...
+            if (input = PEN_HOVERING) {
+                ; go back to brush
+                Send, b
+            }
+            if (input = PEN_ERASER_HOVERING) {
+                ; activate eraser
+                Send, e
+            }
         }
     }
 }
