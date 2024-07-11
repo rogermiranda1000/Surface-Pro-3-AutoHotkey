@@ -16,32 +16,46 @@ global PEN_NOT_HOVERING := 0x0       ; Pen is moved away from screen.
 ; Fill this section with your favorite AutoHotkey scripts!
 ; lastInput is the last input that was detected before a state change.
 PenCallback(input, lastInput) {
-    if (input = PEN_NOT_HOVERING) {
+    ; is the user selecting a region?
+    static selecting := false
+    ; has the user touched the screen while selecting?
+    static has_selected := false
 
-    }
+    if (WinActive("ahk_exe paintdotnet.exe")) {
+        if (!selecting) && (input = PEN_BTN_HOVERING) {
+            ; want to select something (and was not previously selecting)
+            ; note: first we select the pencil to make sure that it was not in some "select-related" tool
+            Send, pss
+            selecting := true
+            has_selected := false
+        }
 
-    if (input = PEN_HOVERING) {
+        if (selecting) && (input = PEN_BTN_TOUCHING) {
+            has_selected := true
+        }
 
-    }
+        ; there's a bug with PEN_HOVERING when coming from PEN_NOT_HOVERING
+        if (selecting) && (lastInput != PEN_NOT_HOVERING && input = PEN_HOVERING) {
+            if (has_selected) {
+                ; previously selecting and done; cut&paste to modify
+                Send, {LControl Down}xv{LControl Up}
+            }
+            else {
+                ; nothing was selected (back to the brush)
+                Send, b
+            }
+            selecting := false
+        }
 
-    if (input = PEN_TOUCHING) {
+        if (input = PEN_ERASER_HOVERING) {
+            ; activate eraser
+            Send, e
+        }
 
-    }
-
-    if (input = PEN_ERASER_HOVERING) {
-
-    }
-
-    if (input = PEN_ERASER_TOUCHING) {
-
-    }
-
-    if (input = PEN_BTN_HOVERING) {
-
-    }
-
-    if (input = PEN_BTN_TOUCHING) {
-
+        if (lastInput = PEN_ERASER_HOVERING || lastInput = PEN_ERASER_TOUCHING) && (input != PEN_ERASER_HOVERING && input != PEN_ERASER_TOUCHING) {
+            ; no longer using the eraser - deactivate (back to the brush)
+            Send, b
+        }
     }
 }
 
